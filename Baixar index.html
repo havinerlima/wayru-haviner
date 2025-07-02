@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Wayru Auto Downloader</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; background: #f4f4f4; text-align: center; padding: 20px; }
+    h1 { color: #1a73e8; }
+    #stats { font-size: 1.5em; margin-top: 20px; }
+    .btn { padding: 10px 20px; font-size: 1em; cursor: pointer; background: #1a73e8; color: white; border: none; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>Wayru Auto Downloader</h1>
+  <p>Simulador de download contínuo para gerar tráfego.</p>
+  <button class="btn" onclick="startDownloads()">Iniciar</button>
+  <div id="stats">
+    <p>Downloads ativos: <span id="active">0</span></p>
+    <p>Dados simulados: <span id="data">0.00</span> GB</p>
+  </div>
+
+  <script>
+    let totalBytes = 0;
+    let activeConnections = 0;
+
+    function simulateDownload() {
+      activeConnections++;
+      document.getElementById("active").innerText = activeConnections;
+
+      const url = "https://speed.hetzner.de/100MB.bin";
+      const controller = new AbortController();
+      fetch(url, { signal: controller.signal })
+        .then(response => {
+          const reader = response.body.getReader();
+          function read() {
+            return reader.read().then(({ done, value }) => {
+              if (done) return;
+              totalBytes += value.length;
+              updateStats();
+              return read();
+            });
+          }
+          return read();
+        })
+        .catch(() => {})
+        .finally(() => {
+          activeConnections--;
+          document.getElementById("active").innerText = activeConnections;
+          simulateDownload();
+        });
+    }
+
+    function updateStats() {
+      const gb = (totalBytes / 1024 / 1024 / 1024).toFixed(2);
+      document.getElementById("data").innerText = gb;
+    }
+
+    function startDownloads() {
+      for (let i = 0; i < 5; i++) {
+        simulateDownload();
+      }
+    }
+  </script>
+</body>
+</html>
