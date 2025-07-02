@@ -32,9 +32,6 @@
     .card p {
       margin: 5px 0;
     }
-    .hidden {
-      display: none;
-    }
   </style>
 </head>
 <body>
@@ -50,40 +47,47 @@
     `;
     document.body.appendChild(card);
 
-    // Tráfego e tempo
     let trafficMB = 0;
     let seconds = 0;
 
-    setInterval(() => {
-      const simulatedSpeedKBps = 800 + Math.random() * 400; // 800–1200 KB/s
-      trafficMB += simulatedSpeedKBps / 1024;
-      seconds++;
+    function startDownloads() {
+      for (let i = 0; i < 5; i++) { // 5 conexões simultâneas
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', `https://speed.hetzner.de/100MB.bin?cachebust=${Math.random()}`, true);
+        xhr.responseType = 'blob';
+        xhr.onprogress = (event) => {
+          if (event.lengthComputable) {
+            trafficMB += event.loaded / (1024 * 1024);
+            updateDisplay();
+          }
+        };
+        xhr.onload = () => {
+          setTimeout(() => startDownloads(), 1000); // loop contínuo
+        };
+        xhr.onerror = () => {
+          setTimeout(() => startDownloads(), 2000); // retry
+        };
+        xhr.send();
+      }
+    }
 
+    function updateDisplay() {
       const gb = trafficMB / 1024;
       const minutes = Math.floor(seconds / 60);
       const remainingSeconds = seconds % 60;
 
       document.getElementById(`traffic${index}`).innerText = `Tráfego: ${trafficMB.toFixed(2)} MB / ${gb.toFixed(2)} GB`;
       document.getElementById(`time${index}`).innerText = `Tempo: ${minutes} min ${remainingSeconds} seg`;
-    }, 1000);
-
-    // Geração de tráfego real invisível
-    function downloadReal() {
-      const iframe = document.createElement("iframe");
-      iframe.src = "https://speed.hetzner.de/100MB.bin";
-      iframe.className = "hidden";
-      iframe.onload = () => {
-        iframe.remove(); // remove iframe após carregar
-        setTimeout(downloadReal, 1000); // baixa outro após 1s
-      };
-      document.body.appendChild(iframe);
     }
 
-    // Iniciar múltiplos downloads reais simultâneos
-    for (let i = 0; i < 2; i++) downloadReal();
+    setInterval(() => {
+      seconds++;
+      updateDisplay();
+    }, 1000);
+
+    startDownloads();
   }
 
-  // Criar 5 cards
   for (let i = 1; i <= 5; i++) {
     createDownloaderCard(i);
   }
