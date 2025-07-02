@@ -1,47 +1,60 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wayru Downloader</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 2em;
-      background-color: #f9f9f9;
-    }
-    .container {
-      background: #004488;
-      color: white;
-      padding: 2em;
-      border-radius: 12px;
-      display: inline-block;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-    .trafego {
-      font-size: 1.4em;
-      margin: 0.5em 0;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Wayru Downloader Turbo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 20px;
+        }
+        .box {
+            background: #004d99;
+            color: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 10px;
+            width: 280px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            font-size: 1.2rem;
+        }
+        h2 { margin: 0 0 10px 0; }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Wayru Downloader</h1>
-    <div id="trafego" class="trafego">Tráfego: 0 MB</div>
-    <div id="tempo" class="trafego">Tempo: 0s</div>
-  </div>
+    <script>
+        function criarBox(sessao) {
+            let trafego = 0;
+            let tempo = 0;
 
-  <script>
-    let mb = 0;
-    let tempo = 0;
+            const box = document.createElement("div");
+            box.className = "box";
+            const h2 = document.createElement("h2");
+            h2.textContent = `Wayru Downloader ${sessao}`;
+            const trafegoP = document.createElement("p");
+            const tempoP = document.createElement("p");
+            box.appendChild(h2);
+            box.appendChild(trafegoP);
+            box.appendChild(tempoP);
+            document.body.appendChild(box);
 
-    setInterval(() => {
-      tempo++;
-      mb += (Math.random() * (2 - 0.5) + 0.5); // Simula 0.5MB a 2MB/s
-      document.getElementById("trafego").innerText = `Tráfego: ${mb.toFixed(2)} MB`;
-      document.getElementById("tempo").innerText = `Tempo: ${tempo}s`;
-    }, 1000);
-  </script>
+            setInterval(() => {
+                trafego += Math.random() * 500 + 100;
+                tempo++;
+                trafegoP.textContent = `Tráfego: ${trafego.toFixed(2)} MB`;
+                tempoP.textContent = `Tempo: ${tempo}s`;
+            }, 1000);
+        }
+
+        for (let i = 1; i <= 5; i++) {
+            criarBox(i);
+        }
+    </script>
 </body>
 </html>
