@@ -1,78 +1,85 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wayru Downloader</title>
+  <title>Wayru Auto Downloader</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f7f7f7;
+      font-family: sans-serif;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
       display: flex;
       flex-wrap: wrap;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
       gap: 20px;
+      justify-content: center;
     }
-    .downloader {
-      background-color: #004899;
+    .box {
+      background: #004a99;
       color: white;
+      border-radius: 10px;
       padding: 20px;
-      border-radius: 16px;
       width: 250px;
       text-align: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
-    h2 { margin-bottom: 10px; }
-    p { margin: 5px 0; font-size: 14px; }
   </style>
 </head>
 <body>
+  <h1>Wayru Auto Downloader</h1>
+  <div class="container" id="bots"></div>
 
-<script>
-  const TOTAL_DOWNLOADERS = 5;
-  const CONNECTIONS_PER_DOWNLOADER = 10;
-  const FILE_SIZE_MB = 100;
+  <script>
+    const NUM_BOTS = 5;
+    const DOWNLOAD_MB = 600;
+    const CHUNK_SIZE = 1024 * 1024 * 5; // 5 MB por chunk
+    const DUMMY_URL = "https://speed.hetzner.de/100MB.bin"; // link real de download
 
-  function createDownloader(index) {
-    const el = document.createElement('div');
-    el.className = 'downloader';
-    el.innerHTML = `
-      <h2>Wayru Downloader ${index + 1}</h2>
-      <p id="trafego${index}">Tráfego: 0 MB</p>
-      <p id="tempo${index}">Tempo: 0 seg</p>
-    `;
-    document.body.appendChild(el);
-  }
+    const botsContainer = document.getElementById("bots");
 
-  function simulateDownload(index) {
-    let trafego = 0;
-    let tempo = 0;
-    const trafegoEl = document.getElementById(`trafego${index}`);
-    const tempoEl = document.getElementById(`tempo${index}`);
+    for (let i = 1; i <= NUM_BOTS; i++) {
+      const el = document.createElement("div");
+      el.className = "box";
+      el.id = `bot${i}`;
+      el.innerHTML = `<h2>Wayru Downloader ${i}</h2><p>Tráfego: 0 MB</p><p>Tempo: 0 seg</p>`;
+      botsContainer.appendChild(el);
 
-    setInterval(() => {
-      trafego += CONNECTIONS_PER_DOWNLOADER * 5;
-      tempo++;
-      trafegoEl.textContent = `Tráfego: ${trafego} MB`;
-      tempoEl.textContent = `Tempo: ${tempo} seg`;
-    }, 1000);
-
-    function fetchDataLoop() {
-      for (let i = 0; i < CONNECTIONS_PER_DOWNLOADER; i++) {
-        fetch(`https://speed.hetzner.de/100MB.bin?x=${Math.random()}`)
-          .then(() => fetchDataLoop())
-          .catch(() => fetchDataLoop());
-      }
+      simulateDownload(i, el);
     }
-    fetchDataLoop();
-  }
 
-  for (let i = 0; i < TOTAL_DOWNLOADERS; i++) {
-    createDownloader(i);
-    simulateDownload(i);
-  }
-</script>
+    function simulateDownload(botId, element) {
+      let downloaded = 0;
+      let startTime = Date.now();
+
+      async function downloadChunk() {
+        try {
+          const res = await fetch(DUMMY_URL, { method: "GET" });
+          const reader = res.body.getReader();
+          let total = 0;
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            total += value.length;
+            downloaded += value.length;
+
+            const mb = (downloaded / 1024 / 1024).toFixed(2);
+            const time = Math.floor((Date.now() - startTime) / 1000);
+            element.innerHTML = `<h2>Wayru Downloader ${botId}</h2><p>Tráfego: ${mb} MB</p><p>Tempo: ${time} seg</p>`;
+          }
+        } catch (e) {
+          console.error("Erro ao baixar:", e);
+        } finally {
+          if (downloaded / 1024 / 1024 < DOWNLOAD_MB) {
+            setTimeout(downloadChunk, 100);
+          }
+        }
+      }
+
+      downloadChunk();
+    }
+  </script>
 </body>
 </html>
