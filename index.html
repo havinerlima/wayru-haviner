@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wayru Downloader</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 2em;
+      background-color: #f9f9f9;
+    }
+    .container {
+      background: #004488;
+      color: white;
+      padding: 2em;
+      border-radius: 12px;
+      display: inline-block;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .trafego {
+      font-size: 1.4em;
+      margin: 0.5em 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Wayru Downloader</h1>
+    <div id="trafego" class="trafego">Tráfego: 0 MB</div>
+    <div id="tempo" class="trafego">Tempo: 0s</div>
+  </div>
+
+  <script>
+    let mb = 0;
+    let tempo = 0;
+
+    setInterval(() => {
+      tempo++;
+      mb += (Math.random() * (2 - 0.5) + 0.5); // Simula 0.5MB a 2MB/s
+      document.getElementById("trafego").innerText = `Tráfego: ${mb.toFixed(2)} MB`;
+      document.getElementById("tempo").innerText = `Tempo: ${tempo}s`;
+    }, 1000);
+  </script>
+</body>
+</html>
