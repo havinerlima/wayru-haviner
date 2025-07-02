@@ -49,21 +49,20 @@
 
     let trafficMB = 0;
     let seconds = 0;
-    const concurrentConnections = 10;
 
-    async function simulateDownload() {
-      const urls = Array.from({ length: concurrentConnections }, () => `https://speed.hetzner.de/100MB.bin?nocache=${Math.random()}`);
-      const responses = urls.map(url => fetch(url, { method: 'GET', cache: 'no-store' }));
+    setInterval(() => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("GET", `https://speed.hetzner.de/100MB.bin?cacheBuster=${Math.random()}`, true);
+      xhr.responseType = "blob";
+      xhr.onload = function () {
+        // dados foram baixados
+      };
+      xhr.send();
 
-      const startTime = performance.now();
-      await Promise.allSettled(responses);
-      const endTime = performance.now();
-
-      const timeDiff = (endTime - startTime) / 1000;
-      const totalMB = (100 * concurrentConnections);
-
-      trafficMB += totalMB;
-      seconds += Math.round(timeDiff);
+      // Simulação para mostrar na tela
+      const speed = Math.random() * (1500 - 700) + 700; // 700–1500 KB/s
+      trafficMB += speed / 1024;
+      seconds++;
 
       const gb = trafficMB / 1024;
       const minutes = Math.floor(seconds / 60);
@@ -71,11 +70,7 @@
 
       document.getElementById(`traffic${index}`).innerText = `Tráfego: ${trafficMB.toFixed(2)} MB / ${gb.toFixed(2)} GB`;
       document.getElementById(`time${index}`).innerText = `Tempo: ${minutes} min ${remainingSeconds} seg`;
-
-      setTimeout(simulateDownload, 1000);
-    }
-
-    simulateDownload();
+    }, 2000);
   }
 
   for (let i = 1; i <= 5; i++) {
