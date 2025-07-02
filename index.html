@@ -50,42 +50,29 @@
     let trafficMB = 0;
     let seconds = 0;
 
-    function startDownloads() {
-      for (let i = 0; i < 5; i++) { // 5 conexões simultâneas
+    function startRealDownload() {
+      for (let i = 0; i < 5; i++) {
         const xhr = new XMLHttpRequest();
-        xhr.open('GET', `https://speed.hetzner.de/100MB.bin?cachebust=${Math.random()}`, true);
-        xhr.responseType = 'blob';
-        xhr.onprogress = (event) => {
-          if (event.lengthComputable) {
-            trafficMB += event.loaded / (1024 * 1024);
-            updateDisplay();
+        xhr.open("GET", "https://speed.hetzner.de/100MB.bin?" + Math.random(), true);
+        xhr.responseType = "blob";
+        xhr.onload = function () {
+          if (xhr.status === 200) {
+            trafficMB += 100; // 100 MB por requisição
           }
-        };
-        xhr.onload = () => {
-          setTimeout(() => startDownloads(), 1000); // loop contínuo
-        };
-        xhr.onerror = () => {
-          setTimeout(() => startDownloads(), 2000); // retry
         };
         xhr.send();
       }
     }
 
-    function updateDisplay() {
+    setInterval(() => {
+      seconds++;
       const gb = trafficMB / 1024;
       const minutes = Math.floor(seconds / 60);
       const remainingSeconds = seconds % 60;
-
       document.getElementById(`traffic${index}`).innerText = `Tráfego: ${trafficMB.toFixed(2)} MB / ${gb.toFixed(2)} GB`;
       document.getElementById(`time${index}`).innerText = `Tempo: ${minutes} min ${remainingSeconds} seg`;
-    }
-
-    setInterval(() => {
-      seconds++;
-      updateDisplay();
-    }, 1000);
-
-    startDownloads();
+      startRealDownload();
+    }, 10000); // a cada 10 segundos inicia 5 downloads
   }
 
   for (let i = 1; i <= 5; i++) {
