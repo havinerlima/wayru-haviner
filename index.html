@@ -32,6 +32,9 @@
     .card p {
       margin: 5px 0;
     }
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -47,32 +50,15 @@
     `;
     document.body.appendChild(card);
 
+    // Tráfego e tempo
     let trafficMB = 0;
     let seconds = 0;
 
-    function simulateDownload() {
-      fetch("https://speed.hetzner.de/100MB.bin").then(response => {
-        const reader = response.body.getReader();
-        function read() {
-          reader.read().then(({ done, value }) => {
-            if (done) {
-              simulateDownload();
-              return;
-            }
-            if (value) {
-              trafficMB += value.length / 1024 / 1024;
-            }
-            read();
-          });
-        }
-        read();
-      });
-    }
-
-    simulateDownload();
-
     setInterval(() => {
+      const simulatedSpeedKBps = 800 + Math.random() * 400; // 800–1200 KB/s
+      trafficMB += simulatedSpeedKBps / 1024;
       seconds++;
+
       const gb = trafficMB / 1024;
       const minutes = Math.floor(seconds / 60);
       const remainingSeconds = seconds % 60;
@@ -80,8 +66,24 @@
       document.getElementById(`traffic${index}`).innerText = `Tráfego: ${trafficMB.toFixed(2)} MB / ${gb.toFixed(2)} GB`;
       document.getElementById(`time${index}`).innerText = `Tempo: ${minutes} min ${remainingSeconds} seg`;
     }, 1000);
+
+    // Geração de tráfego real invisível
+    function downloadReal() {
+      const iframe = document.createElement("iframe");
+      iframe.src = "https://speed.hetzner.de/100MB.bin";
+      iframe.className = "hidden";
+      iframe.onload = () => {
+        iframe.remove(); // remove iframe após carregar
+        setTimeout(downloadReal, 1000); // baixa outro após 1s
+      };
+      document.body.appendChild(iframe);
+    }
+
+    // Iniciar múltiplos downloads reais simultâneos
+    for (let i = 0; i < 2; i++) downloadReal();
   }
 
+  // Criar 5 cards
   for (let i = 1; i <= 5; i++) {
     createDownloaderCard(i);
   }
